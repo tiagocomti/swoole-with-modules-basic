@@ -105,7 +105,26 @@ return [
 ### Swoole
 To start your own swoole server make sure you server doest use the port 9500. if is in use change the `config/server.php` port tag for a randon port you like
 
+now, we need to configure a location for your swoole server like my nginx.conf 
+
+```
+    location /apiswoole {
+        	try_files $uri $uri/ @swoole_core;
+    }
+
+    location @swoole_core {
+        proxy_http_version 1.1;
+        proxy_set_header Host $http_host;
+        proxy_set_header Scheme $scheme;
+        proxy_set_header SERVER_PORT $server_port;
+        proxy_set_header REMOTE_ADDR $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass http://127.0.0.1:9500;
+    }
+```
+
 now, run `./yii swoole/start` for start swoole, if you need restart (after any changes you make in your project) run `./yii swoole/restart`. And if you want to stop, run `./yii swoole/stop`.
+
 
 ### Modules
 At Modules directory we have API module and inside we have v1. you can create any modules you want, just make sure config in your `config/web.php` like this:
@@ -133,3 +152,13 @@ At Modules directory we have API module and inside we have v1. you can create an
 
 
 If I can make a person's life easier, I'll be happy!
+
+Teste your swoole performance
+-------------
+
+Run this command and lets see the comparison between swoole and php-fpm
+
+
+./yii swoole/benchmarking http://127.0.0.1:65444
+
+PS: 65444 is my yiiwebapp run in port 65444.

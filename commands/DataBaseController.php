@@ -15,7 +15,7 @@ class DataBaseController extends Controller
         $string = (BaseConsole::input("set a 32byte database pass: "));
         $pass = Crypt::easyEncrypt($string, Crypt::getOurSecret());
         $byte_array = unpack('C*', $pass);
-        BaseConsole::output($this->ansiFormat("Paste it in your db conf:", Console::FG_GREEN));
+        BaseConsole::output($this->ansiFormat("Paste it in your db conf:", BaseConsole::FG_GREEN));
         BaseConsole::output(json_encode($byte_array));
     }
 
