@@ -12,6 +12,11 @@ defined('STDERR') or define('STDERR', fopen('php://stderr', 'w'));
 class SwooleController extends Controller
 {
     public function actionStart(){
+        $pid = @file_get_contents( __DIR__ .'/../runtime/swoole.pid');
+        if ($pid) {
+            BaseConsole::output('swoole is running.');
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
         BaseConsole::output('Starting swoole...');
         BaseConsole::output(shell_exec("/usr/local/bin/php ".__DIR__."/../bootstrap.php"));
     }
