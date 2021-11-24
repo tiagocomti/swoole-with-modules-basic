@@ -9,7 +9,6 @@ class TesteController extends DefaultController
      * Creating a new user for my sis. Curl example:
      */
     public function actionIndex(){
-        \Yii::info("oi","api");
         return ['return'=>true];
     }
 }

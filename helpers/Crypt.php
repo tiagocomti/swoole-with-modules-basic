@@ -10,6 +10,7 @@ use yii\web\UnauthorizedHttpException;
 
 class Crypt{
 
+    const PATH_KEYS = __DIR__."/../keys/";
     public $private_key;
     public $public_key;
     public $public_key_hex;
@@ -43,15 +44,33 @@ class Crypt{
     }
 
 
-    public static function basicEncryption(string $string)
+    /**
+     * @throws Exception
+     */
+    public static function basicEncryption(array $array)
     {
-        //TODO criar uma criptografia melhor, claro. isso é apenas um teste
-        return base64_encode($string);
+        $array["checksum"] = hash("sha256",json_encode($array));
+        $array["client"] = (isset(getallheaders()["X-Forwarded-For"]))?getallheaders()["X-Forwarded-For"]:$_SERVER["REMOTE_ADDR"];
+        return self::easyEncrypt(json_encode($array), self::getOurSecret());
     }
 
-    public static function basicDecryption($string){
-        //TODO criar uma criptografia melhor, claro. isso é apenas um teste
-        return base64_decode($string);
+    /**
+     * @throws Exception
+     * @throws \Exception
+     */
+    public static function basicDecryption($string):?array{
+        $array = json_decode(self::easyDecrypt($string, self::getOurSecret()), true);
+        $checksum = $array["checksum"];
+        $client = $array["client"];
+        unset($array["checksum"]);
+        unset($array["client"]);
+        $new_checksum = hash("sha256",json_encode($array));
+        $new_client = (isset(getallheaders()["X-Forwarded-For"]))?getallheaders()["X-Forwarded-For"]:$_SERVER["REMOTE_ADDR"];
+
+        if($checksum !== $new_checksum){throw new UnauthorizedHttpException("fail on compare checksum This package no longer has integrity",401);}
+
+//        if($client !== $new_client){throw new UnauthorizedHttpException("fail on compare client This package no longer has AuthZ. UserIP: ".$client." Token client IP: ".$new_client,401);}
+        return $array;
     }
 
     public static function encryptPayload($payload, $private_key, $dpo_pub_key){
@@ -68,7 +87,7 @@ class Crypt{
     public static function easyEncrypt(string $message, string $key): string
     {
         if (mb_strlen($key, '8bit') !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES) {
-            throw new Exception('Key is not the correct size (must be 32 bytes).');
+            $key = Strings::convertTo32Bit($key);
         }
         $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
 
@@ -87,6 +106,10 @@ class Crypt{
 
     public static function easyDecrypt($encrypted, string $key): string
     {
+        if (mb_strlen($key, '8bit') !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES) {
+            $key = Strings::convertTo32Bit($key);
+        }
+
         if(is_resource($encrypted)) {
             $encrypted = (stream_get_contents($encrypted));
         }
@@ -118,6 +141,10 @@ class Crypt{
         if(is_resource($pbk)) {
             $pbk = (stream_get_contents($pbk));
         }
+        if(!Strings::isBinary($pbk)){
+            $pbk =  sodium_hex2bin($pbk);
+        }
+
         return sodium_bin2hex(sodium_crypto_box_seal($data, $pbk));
     }
 
@@ -225,9 +252,16 @@ class Crypt{
         return $decrypt;
     }
 
+    /**
+     * @throws \SodiumException
+     */
     public static function decryptByPrivateK($data, $privateKey){
         if(is_resource($data)) {
             $data = (stream_get_contents($data));
+        }
+
+        if(is_resource($privateKey)) {
+            $privateKey = (stream_get_contents($privateKey));
         }
 
         if(!Strings::isBinary($privateKey)){
@@ -255,6 +289,22 @@ class Crypt{
         fclose($myfile);
 
         return self::encryptFileBySecret($path, $secret);
+    }
+
+    public static function getOurKeyPair(){
+        if (!file_exists(self::PATH_KEYS)) {
+            mkdir(self::PATH_KEYS, 0700, true);
+        }
+
+        if(!file_exists(self::PATH_KEYS."server.key.enc")){
+            $keypair = Crypt::generateKeyPair(Password::generateApiKey(time()));
+            Crypt::safeWriteInFile(self::PATH_KEYS."server.key",$keypair->private_key,Crypt::getOurSecret());
+            return $keypair;
+        }else{
+            $private_key = Crypt::decryptFileBySecret(self::PATH_KEYS."server.key.enc", Crypt::getOurSecret());
+            $keypair = new Crypt($private_key);
+            return $keypair;
+        }
     }
 
 

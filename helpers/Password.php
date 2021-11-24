@@ -25,7 +25,10 @@ class Password
      */
     public static function validate($password, $hash)
     {
-        return Yii::$app->security->validatePassword($password, $hash);
+        if($password) {
+            return Yii::$app->security->validatePassword($password, $hash);
+        }
+        return false;
     }
 
     /**
@@ -64,7 +67,7 @@ class Password
         return $password;
     }
     
-    public static function generateApiKey($user_digest){
+    public static function generateApiKey($user_digest):string {
         return hash('sha256',"$user_digest".bin2hex(random_bytes(64)));
     }
 

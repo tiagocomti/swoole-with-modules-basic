@@ -19,6 +19,7 @@ return
         'max_request' => 10000,
         'dispatch_mode' => 2,
         'log_level'=> 0,
+        'task_worker_num' => 2,
         'user' => 'www',
         'group' => 'www',
     ]

@@ -17,9 +17,9 @@ namespace app\helpers;
 class Date {
     /**
      *
-     * Specific datetime method for adding days to another date. 
-     * 
-     * 
+     * Specific datetime method for adding days to another date.
+     *
+     *
      * @param string $date Date time you will receive additional days
      * @param int $days Numbers of days to add on $date
      * @param string $format php format that will be returned after adding dates. Default will be "Y-m-d"
@@ -32,7 +32,24 @@ class Date {
         $horaFim = date($format, strtotime("".$data." + ".$days." days"));
         return $horaFim;
     }
-    
+
+    /**
+     *
+     * Specific datetime method for adding hours to another date.
+     *
+     *
+     * @param string $date date you will receive additional mins
+     * @param int $mins Numbers of min to add on $date
+     * @param string $format php format that will be returned after adding dates. Default will be "Y-m-d"
+     * @return string will return the date with the format applied
+     * @example date::addDays("2019/10/10", 10, "Y-h-m"); return "2019-10-20"
+     */
+    public static function addMins($date, int $mins, string $format = "Y-m-d"): string{
+        $data = str_replace('/', '-', $date);
+        $data = date($format, strtotime($date));
+        return date($format, strtotime("".$data." + ".$mins." mins"));
+    }
+
     /**
      *
      * Specific datetime method for decrease days to another date.
@@ -49,10 +66,10 @@ class Date {
         $horaFim = date($format, strtotime("".$data." - ".$days." days"));
         return $horaFim;
     }
-    
+
     /**
      * Method used to differentiate two dates regardless of their format. This method will return an array.
-     * 
+     *
      * @param string $data1
      * @param string $data2
      * @return array Returns an array the difference between the dates.
@@ -75,7 +92,7 @@ class Date {
         $anos = ($diff->format("%y"));
         return ["seconds" => $segundos, "min" => $min, "hours" => $hors, "days" => $dias, "month" => $mes, "years" => $anos];
     }
-    
+
     public static function formatDate($data, $formato = "Y-m-d H:i:s"){
         $data = str_replace('/', '-', $data);
         $data = date('Y-m-d H:i:s', strtotime($data));
@@ -89,13 +106,5 @@ class Date {
         }else{
             return false;
         }
-    }
-
-    public static function getTimeWithMicroseconds() {
-        $t = microtime(true);
-        $micro = sprintf("%06d", ($t - floor($t)) * 1000000);
-        $d = new \DateTime(date('Y-m-d H:i:s.' . $micro, $t));
-
-        return $d->format("Y-m-d H:i:s.u");
     }
 }

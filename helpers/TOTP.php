@@ -21,9 +21,8 @@ class TOTP extends OTP
      * @example Array('interval' => 30, 'digits' => 6)
      */
     public function __construct($s, $opt = Array()) {
-        if(Strings::isBinary($s) === false){$s = self::Desencriptar($s);}
-        $this->interval = isset($opt['interval']) ? $opt['interval'] : 30;
-        parent::__construct(self::Desencriptar($s), $opt);
+        $this->interval = $opt['interval'] ?? 30;
+        parent::__construct($s, $opt);
     }
 
     /**
@@ -75,7 +74,11 @@ class TOTP extends OTP
         if (empty($token)) {
             return false;
         }
-        $otpSeed = new self(self::Desencriptar($secret), Array('interval' => $interval, 'digits' => $digits));
+        $otpSeed = new self(OTP::Desencriptar($secret), Array('interval' => $interval, 'digits' => $digits));
+
+        if(empty($otpSeed->secret)){
+            return false;
+        }
         $time = time();
         for ($iOtp = 0; $iOtp < 90; $iOtp += 30) {
             $otp = $otpSeed->atBase32($time - $iOtp);
