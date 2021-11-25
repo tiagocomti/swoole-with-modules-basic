@@ -9,6 +9,8 @@
 
 namespace app\helpers;
 
+use DateTime;
+
 /**
  * Class responsible for formatting and calculating dates
  *
@@ -106,5 +108,12 @@ class Date {
         }else{
             return false;
         }
+    }
+
+    public static function getTimeWithMicroseconds()
+    {
+        $t = microtime(true);
+        $d = DateTime::createFromFormat('U.v', number_format($t/1000, 3, '.', ''));
+        return $d->format("m-d-Y H:i:s.u");
     }
 }
