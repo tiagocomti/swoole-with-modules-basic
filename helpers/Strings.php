@@ -8,6 +8,8 @@
 
 namespace app\helpers;
 
+use phpDocumentor\Reflection\Types\Self_;
+
 /**
  * Description of newPHPClass
  *
@@ -77,6 +79,12 @@ class Strings {
         $after = array('a', 'a', 'a', 'a', 'a', 'a', 'c', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'n', 'o', 'o', 'o', 'o', 'o', 'u', 'u', 'u', 'y', 'A', 'A', 'A', 'A', 'A', 'A', 'C', 'E', 'E', 'E', 'E', 'I', 'I', 'I', 'I', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'U', 'U', 'U',"","_","_","_");
         $valor = str_replace($before, $after, $valor);
         return $valor;
+    }
+
+    public static function sanitizationCPFCNPJ($cpf){
+        $before = array('-','.','\\',"/");
+        $cpf = str_replace($before, "", $cpf);
+        return self::removeEspecialCharacters($cpf);
     }
 
     public static function generateApiUser()

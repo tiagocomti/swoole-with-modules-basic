@@ -19,6 +19,12 @@ class Crypt{
 
     public function __construct($private_key = false)
     {
+        $this->private_key = false;
+        $this->key_pair = false;
+        $this->private_key_hex =false;
+        $this->public_key = false;
+        $this->public_key_hex = false;
+
         if(!Strings::isBinary($private_key)){
             $private_key =  sodium_hex2bin($private_key);
         }

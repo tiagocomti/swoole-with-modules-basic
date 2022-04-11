@@ -13,6 +13,7 @@
  */
 namespace app\modules\api;
 
+use app\models\base\ActiveRecord;
 use Yii;
 use yii\base\BootstrapInterface;
 use yii\base\Module as BaseModule;
@@ -25,6 +26,17 @@ class Module extends BaseModule implements BootstrapInterface
     {
         parent::init();
         \Yii::configure($this, require(__DIR__ . '/config.php'));
+    }
+
+    public function beforeAction($action)
+    {
+        if (!ActiveRecord::getDb()->getIsActive()) {
+            Yii::warning("db inativo","api");
+            ActiveRecord::getDb()->close();
+            ActiveRecord::getDb()->open();
+        }
+//        \Yii::info("Iniciando base de dados no module", "api");
+        return parent::beforeAction($action);
     }
 
     public function bootstrap($app)
