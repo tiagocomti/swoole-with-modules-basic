@@ -14,6 +14,16 @@ $config = [
         '@tests' => '@app/tests',
     ],
     'components' => [
+        'cryptbox' => [
+            'class' => 'tiagocomti\cryptbox\Cryptbox',
+            //Path to save our keys. Need to set chown www in your root directory
+            'keysPath' =>  __DIR__."/../../keys/",
+            // Execute: php yii cryptBox/crypt/encode '{Your key}'
+            'secret' => '{"1":95,"2":86,"3":65,"4":77,"5":79,"6":83,"7":66,"8":82,"9":73,"10":78,"11":68,"12":65,"13":82,"14":79,"15":72,"16":79,"17":74,"18":69,"19":65,"20":77,"21":65,"22":78,"23":72,"24":65,"25":83,"26":79,"27":65,"28":68,"29":69,"30":85,"31":83,"32":95}',
+            // Less security but faster
+            'enableCache' => true,
+            'timeCache' => 800
+        ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
